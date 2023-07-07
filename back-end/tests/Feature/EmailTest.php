@@ -22,8 +22,31 @@ class EmailTest extends TestCase
     public function subscribeUsersCanReceiveEmails(): void
     {
         $post_data = $this->postData();
+        $this->usersCanSubscribeWebPage();
         $users = $this->websiteUsersAbleToPostPosts($post_data);
         // $this->sendEmailToSubscribers($users['users']);
+    }
+
+    public function usersCanSubscribeWebPage()
+    {
+        $this->usersCanViewWebsites();
+        $data = [
+            'website_id' => 1,
+            'email' => 'test@gmail.com'
+        ];
+        $response = $this->postJson('api/subscribe', $data);
+        $response->assertStatus(201)->assertJson([
+            'message' =>'Subscribed Successfully'
+        ]);
+    }
+
+    public function usersCanViewWebsites()
+    {
+        $response = $this->getJson('api/websites');
+        $response->assertStatus(200)->assertJsonStructure([
+            'status',
+            'data'
+        ]);
     }
 
     public function websiteUsersAbleToPostPosts(array $post): array
