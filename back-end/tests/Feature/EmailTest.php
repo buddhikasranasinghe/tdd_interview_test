@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\PostMailJob;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Website;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class EmailTest extends TestCase
@@ -105,10 +107,12 @@ class EmailTest extends TestCase
 
     public function sendEmailToSubscribers(array $users): void
     {
+        Queue::fake();
+        Queue::assertPushed(PostMailJob::class);
         foreach ($users as $email) {
-            Mail::fake();
+            // Mail::fake();
             Mail::assertSent(PostMail::class, function($mail) use($email) {
-                return $mail->hasTo($email);
+                return $mail->to == $email;
             });   
         }
     }
